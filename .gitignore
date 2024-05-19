@@ -14,7 +14,8 @@ yarn-error.log*
 *.njsproj
 *.sln
 
-run_client.bat
-run_server.bat
-pull.bat
+**/__pycache__/
+
+add.bat
 push.bat
+pull.bat
