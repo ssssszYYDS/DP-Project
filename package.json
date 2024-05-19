@@ -1,0 +1,17 @@
+{
+  "name": "jsonvee",
+  "version": "3.0.0",
+  "description": "jsonVee 全新升级项目",
+  "keywords": [],
+  "license": "ISC",
+  "author": "",
+  "main": "start.js",
+  "scripts": {
+    "start": "node start.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "engines": {
+    "node": ">=20.11.0",
+    "npm": ">=10.1.0"
+  }
+}
