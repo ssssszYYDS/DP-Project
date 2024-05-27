@@ -58,32 +58,6 @@ class Game:
         # 返回获胜者
         return self.game_state.players[1].alive
 
-    def main_UI(self):
-        print(f"Game started with UI")
-        # 主游戏循环
-        while not self.is_finished():
-            current_player = self.game_state.players[self.game_state.current_player_id]
-
-            # 从当前玩家处获取动作
-            if current_player.is_human:
-                action = current_player.get_action(self.game_state, self.UI)
-            else:
-                action = current_player.get_action(self.game_state)
-            print(f"current player: {current_player.name}, action: {action.action_type}")
-
-            # 更新游戏状态
-            self.update_game_state(action)
-            self.UI.update_game_info_ui()
-            self.UI.update_game_board_ui()
-
-            # 切换到下一个玩家
-            self.game_state.current_player_id += 1
-
-            if self.game_state.current_player_id > len(self.game_state.players):
-                self.game_state.current_player_id = 1
-                for player in self.game_state.players.values():
-                    player.has_moved = False
-
     def run(self):
         # 主游戏循环
         while not self.is_finished():
