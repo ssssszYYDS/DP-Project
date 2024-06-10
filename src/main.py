@@ -1,18 +1,20 @@
 import random
 from Human_Player import HumanPlayer
-from AI_Player import RandomPlayer
+from AI_Player import *
 
 from Cell import Cell
 from Game import Game
 from UI import *
 
 if __name__ == "__main__":
-    seed = "MGMT1317"
+    # seed = "MGMT1317"
+    seed = "1234"
     random.seed(seed)
 
     # 创建一些示例玩家
     players = [
-        HumanPlayer(1, 'Alice'),
+        # HumanPlayer(1, 'Alice'),
+        RandomPlayer(1, 'Alice'),
         RandomPlayer(2, 'Bob'),
     ]
 

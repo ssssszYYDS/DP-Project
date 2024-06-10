@@ -18,6 +18,19 @@ class UI(QMainWindow):
 
         self.last_action = None
 
+        self.type2color = {
+            'building': 'lightblue',
+            'start': 'green',
+            'jail': 'orange',
+            'go_to_jail': 'red',
+            'chance': 'yellow',
+            'community_chest': 'purple',
+        }
+        self.playerid2color = {
+            1: 'lightgreen',
+            2: 'blue',
+        }
+
         self.initUI()
 
     def initUI(self):
@@ -46,14 +59,6 @@ class UI(QMainWindow):
         self.layout.addLayout(self.game_info_layout)
 
     def create_game_board_ui(self):
-        type2color = {
-            'building': 'lightblue',
-            'start': 'green',
-            'jail': 'orange',
-            'go_to_jail': 'red',
-            'chance': 'yellow',
-            'community_chest': 'purple',
-        }
 
         # 创建游戏棋盘
         self.board_widget = QWidget()
@@ -65,7 +70,7 @@ class UI(QMainWindow):
             cell_widget = QLabel()
             cell_widget.setAlignment(Qt.AlignCenter)
             # 根据单元格类型设置背景颜色
-            cell_bg_color = type2color.get(cell.type, 'lightgrey')
+            cell_bg_color = self.type2color.get(cell.type, 'lightgrey')
 
             cell_widget.setStyleSheet(f"""
                 QLabel {{
@@ -105,6 +110,18 @@ class UI(QMainWindow):
 
             cell_widget.setText(text)
 
+        for player_id, player in self.game.game_state.players.items():
+            for cell in player.cells_owned:
+                cell_widget = self.cells_widgets[cell.position]
+                cell_bg_color = self.playerid2color.get(player_id, 'grey')
+
+                cell_widget.setStyleSheet(f"""
+                    QLabel {{
+                        background-color: {cell_bg_color};
+                        border: 1px solid black;
+                    }}
+                """)
+
     def none_operation(self):
         self.last_action = 'none'
 
@@ -129,10 +146,10 @@ class UI(QMainWindow):
     def get_reward(self):
         self.last_action = 'get_reward'
 
-    # def show_message(self, message):
-    #     msg = QMessageBox()
-    #     msg.setText(message)
-    #     msg.exec_()
+    def show_message(self, message):
+        msg = QMessageBox()
+        msg.setText(message)
+        msg.exec_()
 
     def get_action(self, action_list):
         action_type_list = [action.action_type for action in action_list]
@@ -202,4 +219,6 @@ class UI(QMainWindow):
         return Action("none", self.game.game_state.current_player_id)  # 如果没有选择操作，返回 "none"
 
     def run(self):
-        self.game.run()
+        winner = self.game.run()
+        self.show_message(f"游戏结束！{winner.name}获胜！用时{self.game.game_state.round}轮")
+        sys.exit()

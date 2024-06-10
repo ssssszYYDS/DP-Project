@@ -9,13 +9,12 @@ class HumanPlayer(Player):
         self.is_human = True
 
     def get_action(self, gameState, UI=None):
-        action_list = self.get_action_list(gameState)
+        action_list = gameState.get_action_list()
         if UI is not None:
             return UI.get_action(action_list)
         match action_list:
             case []:
-                print("No actions available")
-                return Action('none', self.id)
+                raise ("No actions available")
             case [action]:
                 return action
             case _:

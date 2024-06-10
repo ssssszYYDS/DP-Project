@@ -19,3 +19,4 @@ yarn-error.log*
 add.bat
 push.bat
 pull.bat
+run.bat

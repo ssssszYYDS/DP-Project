@@ -14,11 +14,50 @@ class GameState:
         self.cells = {cell.position: cell for cell in cells}
         self.cell_connections = connections
 
+        self.round = 0
+
     def __repr__(self):
         return f"GameState: \n" \
             f"Current Player: {self.players[self.current_player_id].name}, \n" \
             f"Players: {self.players}, \n" \
             f"cells: {self.cells}\n"
+
+    def get_action_list(self):
+        player = self.players[self.current_player_id]
+
+        action_list = []
+        if player.in_jail > 0:
+            # 在监狱中
+            action_list.append(Action('in_jail', player.id))
+        elif not player.has_moved:
+            # 移动
+            action_list.append(Action('move', player.id))
+        else:
+            current_cell = self.cells[player.position]
+            match current_cell.type:
+                case 'building':
+                    match current_cell.owner:
+                        case None:
+                            action_list.append(Action('none', player.id))
+                            if player.balance >= current_cell.price:
+                                action_list.append(Action('buy', player.id))
+                        case player.id:
+                            action_list.append(Action('none', player.id))
+                            action_list.append(Action('sell', player.id))
+                        case _:
+                            action_list.append(Action('pay_rent', player.id))
+                case 'go_to_jail':
+                    action_list.append(Action('go_to_jail', player.id))
+                case 'community_chest':
+                    action_list.append(Action('get_reward', player.id))
+                case _:
+                    action_list.append(Action('none', player.id))
+        return action_list
+
+    def get_next_state(self, action: Action):
+        next_state = deepcopy(self)
+        action.perform(next_state)
+        return next_state
 
 
 class Game:
@@ -52,36 +91,48 @@ class Game:
 
     def is_finished(self):
         # 判断游戏是否结束
-        return not (self.game_state.players[1].alive and self.game_state.players[2].alive)
+        return sum(player.alive for player in self.game_state.players.values()) <= 1
 
-    def is_winner(self):
+    def get_winner(self):
         # 返回获胜者
-        return self.game_state.players[1].alive
+        return max(self.game_state.players.values(), key=lambda x: x.balance)
 
     def run(self):
         # 主游戏循环
         while not self.is_finished():
             current_player = self.game_state.players[self.game_state.current_player_id]
 
-            # 从当前玩家处获取动作
-            if self.UI is not None and current_player.is_human:
-                action = current_player.get_action(self.game_state, self.UI)
-            else:
-                action = current_player.get_action(self.game_state)
-            print(f"current player: {current_player.name}, action: {action.action_type}")
+            # 从当前玩家处获取动作2次(一次移动，一次其他动作)
+            for _ in range(2):
+                if self.UI is not None and current_player.is_human:
+                    action = current_player.get_action(self.game_state, self.UI)
+                else:
+                    action = current_player.get_action(self.game_state)
+                print(f"current player: {current_player.name}, action: {action.action_type}")
 
-            # 更新游戏状态
-            self.update_game_state(action)
-            self.UI.update_game_info_ui()
-            self.UI.update_game_board_ui()
+                # 更新游戏状态
+                self.update_game_state(action)
+                self.UI.update_game_info_ui()
+                self.UI.update_game_board_ui()
 
             # 切换到下一个玩家
             self.game_state.current_player_id += 1
 
+            # 一轮结束
             if self.game_state.current_player_id > len(self.game_state.players):
                 self.game_state.current_player_id = 1
+                self.game_state.round += 1
                 for player in self.game_state.players.values():
                     player.has_moved = False
+
+                    player.balance -= 20  # 每一轮结束时扣除一定金额
+                    if player.balance < 0:
+                        player.alive = False
+
+                self.UI.update_game_info_ui()
+                self.UI.update_game_board_ui()
+
+        return self.get_winner()
 
     def reset(self):
         # 重置游戏状态

@@ -43,38 +43,38 @@ class Action:
                 raise ValueError("Invalid move")
 
         player.position = current_position
+        player.has_moved = True
 
     def buy_property(self, gameState):
         # 购买地产的逻辑
         player = gameState.players[self.player_id]
         cell = gameState.cells[player.position]
-        if player.balance >= cell.price:
-            player.balance -= cell.price
-            player.cells_owned.append(cell)
-            cell.owner = player.id
-        else:
-            raise ValueError("Player does not have enough balance to buy the property")
 
-    def sell_property(self, gameState, detail):
+        assert player.balance >= cell.price, "Player does not have enough balance to buy the property"
+
+        player.balance -= cell.price
+        player.cells_owned.append(cell)
+        cell.owner = player.id
+
+    def sell_property(self, gameState):
         # 卖出地产的逻辑
         player = gameState.players[self.player_id]
         cell = gameState.cells[player.position]
-        if cell in player.cells_owned:
-            player.balance += cell.price
-            player.cells_owned.remove(cell)
-            cell.owner = None
-        else:
-            raise ValueError("Player does not own the property")
+
+        assert cell in player.cells_owned, "Player does not own the property"
+
+        player.balance += cell.price
+        player.cells_owned.remove(cell)
+        cell.owner = None
 
     def pay_rent(self, gameState):
         # 支付租金的逻辑
         player = gameState.players[self.player_id]
         cell = gameState.cells[player.position]
         owner = gameState.players[cell.owner]
-        if player.balance >= cell.rent:
-            player.balance -= cell.rent
-            owner.balance += cell.rent
-        else:
+        player.balance -= cell.rent
+        owner.balance += cell.rent
+        if player.balance < 0:
             player.alive = False
 
     def in_jail(self, gameState):
