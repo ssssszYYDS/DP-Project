@@ -1,4 +1,5 @@
 import random
+from time import sleep
 from Human_Player import HumanPlayer
 from AI_Player import RandomPlayer
 
@@ -97,23 +98,24 @@ class Game:
         # 返回获胜者
         return max(self.game_state.players.values(), key=lambda x: x.balance)
 
-    def run(self):
+    def update_UI(self):
+        if self.UI:
+            self.UI.update_game_info_ui()
+            self.UI.update_game_board_ui()
+
+    def run(self, max_rounds: int = 10000, step_time: float = 0.0):
         # 主游戏循环
         while not self.is_finished():
             current_player = self.game_state.players[self.game_state.current_player_id]
 
             # 从当前玩家处获取动作2次(一次移动，一次其他动作)
             for _ in range(2):
-                if self.UI is not None and current_player.is_human:
-                    action = current_player.get_action(self.game_state, self.UI)
-                else:
-                    action = current_player.get_action(self.game_state)
-                print(f"current player: {current_player.name}, action: {action.action_type}")
+                action = current_player.get_action(self.game_state, self.UI)
+                print(f"current player: {current_player.name}, \taction: {action.action_type}")
 
                 # 更新游戏状态
                 self.update_game_state(action)
-                self.UI.update_game_info_ui()
-                self.UI.update_game_board_ui()
+                self.update_UI()
 
             # 切换到下一个玩家
             self.game_state.current_player_id += 1
@@ -129,8 +131,13 @@ class Game:
                     if player.balance < 0:
                         player.alive = False
 
-                self.UI.update_game_info_ui()
-                self.UI.update_game_board_ui()
+                self.update_UI()
+
+            if self.game_state.round > max_rounds:
+                break
+
+            if step_time > 0:
+                sleep(step_time)
 
         return self.get_winner()
 
@@ -141,64 +148,3 @@ class Game:
 
     def __repr__(self):
         return f"score: {self.score},\ngame_state:\n{self.game_state}"
-
-
-if __name__ == "__main__":
-    # 创建一些示例玩家
-    players = [
-        HumanPlayer(1, 'Alice'),
-        RandomPlayer(2, 'Bob'),
-    ]
-
-    # 创建一些示例格子
-    cells = [
-        Cell((0, 0), 'Cell (0, 0)', 'building', {'price': 100, 'rent': 20}),
-        Cell((0, 1), 'Cell (0, 1)', 'building', {'price': 100, 'rent': 20}),
-        Cell((0, 2), 'Cell (0, 2)', 'building', {'price': 100, 'rent': 20}),
-        Cell((0, 3), 'Cell (0, 3)', 'building', {'price': 100, 'rent': 20}),
-        Cell((0, 4), 'Cell (0, 4)', 'building', {'price': 100, 'rent': 20}),
-        Cell((0, 5), 'Cell (0, 5)', 'building', {'price': 100, 'rent': 20}),
-        Cell((1, 0), 'Cell (1, 0)', 'building', {'price': 100, 'rent': 20}),
-        Cell((1, 5), 'Cell (1, 5)', 'building', {'price': 100, 'rent': 20}),
-        Cell((2, 0), 'Cell (2, 0)', 'building', {'price': 100, 'rent': 20}),
-        Cell((2, 5), 'Cell (2, 5)', 'building', {'price': 100, 'rent': 20}),
-        Cell((3, 0), 'Cell (3, 0)', 'building', {'price': 100, 'rent': 20}),
-        Cell((3, 5), 'Cell (3, 5)', 'building', {'price': 100, 'rent': 20}),
-        Cell((4, 0), 'Cell (4, 0)', 'building', {'price': 100, 'rent': 20}),
-        Cell((4, 5), 'Cell (4, 5)', 'building', {'price': 100, 'rent': 20}),
-        Cell((5, 0), 'Cell (5, 0)', 'building', {'price': 100, 'rent': 20}),
-        Cell((5, 1), 'Cell (5, 1)', 'building', {'price': 100, 'rent': 20}),
-        Cell((5, 2), 'Cell (5, 2)', 'building', {'price': 100, 'rent': 20}),
-        Cell((5, 3), 'Cell (5, 3)', 'building', {'price': 100, 'rent': 20}),
-        Cell((5, 4), 'Cell (5, 4)', 'building', {'price': 100, 'rent': 20}),
-        Cell((5, 5), 'Cell (5, 5)', 'building', {'price': 100, 'rent': 20}),
-    ]
-
-    connections = {
-        (0, 0): {1: (0, 1), -1: (1, 0)},
-        (0, 1): {1: (0, 2), -1: (0, 0)},
-        (0, 2): {1: (0, 3), -1: (0, 1)},
-        (0, 3): {1: (0, 4), -1: (0, 2)},
-        (0, 4): {1: (0, 5), -1: (0, 3)},
-        (0, 5): {1: (1, 5), -1: (0, 4)},
-        (1, 0): {1: (0, 0), -1: (2, 0)},
-        (1, 5): {1: (2, 5), -1: (0, 5)},
-        (2, 0): {1: (1, 0), -1: (3, 0)},
-        (2, 5): {1: (3, 5), -1: (1, 5)},
-        (3, 0): {1: (2, 0), -1: (4, 0)},
-        (3, 5): {1: (4, 5), -1: (2, 5)},
-        (4, 0): {1: (3, 0), -1: (5, 0)},
-        (4, 5): {1: (5, 5), -1: (3, 5)},
-        (5, 0): {1: (4, 0), -1: (5, 1)},
-        (5, 1): {1: (5, 2), -1: (5, 0)},
-        (5, 2): {1: (5, 3), -1: (5, 1)},
-        (5, 3): {1: (5, 4), -1: (5, 2)},
-        (5, 4): {1: (5, 5), -1: (5, 3)},
-        (5, 5): {1: (4, 5), -1: (5, 4)},
-    }
-
-    # 初始化游戏状态
-    initial_game = Game(players, cells, connections)
-
-    # 显示初始游戏状态
-    print(initial_game)

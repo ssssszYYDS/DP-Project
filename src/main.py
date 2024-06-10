@@ -6,9 +6,23 @@ from Cell import Cell
 from Game import Game
 from UI import *
 
+
+def run_UI(game: Game):
+    app = QApplication(sys.argv)
+    main_window = UI(game)
+    main_window.show()
+    main_window.run(max_rounds=10000)
+    sys.exit(app.exec_())
+
+
+def run_game(game: Game):
+    winner = game.run(max_rounds=10000)
+    print(f"游戏结束！{winner.name}获胜！用时{game.game_state.round}轮")
+    sys.exit()
+
+
 if __name__ == "__main__":
-    # seed = "MGMT1317"
-    seed = "1234"
+    seed = "MGMT1317"
     random.seed(seed)
 
     # 创建一些示例玩家
@@ -20,26 +34,26 @@ if __name__ == "__main__":
 
     # 创建一些示例格子
     cells = [
-        Cell((0, 0), 'Cell (0, 0)', 'start', None),
-        Cell((0, 1), 'Cell (0, 1)', 'building', {'price': 100, 'rent': 20}),
-        Cell((0, 2), 'Cell (0, 2)', 'building', {'price': 100, 'rent': 20}),
+        Cell((0, 0), 'start', 'start', None),
+        Cell((0, 1), 'Building', 'building', {'price': 100, 'rent': 20}),
+        Cell((0, 2), 'Building', 'building', {'price': 100, 'rent': 20}),
         Cell((0, 3), 'Cell (0, 3)', 'community_chest', {'reward': 100}),
-        Cell((0, 4), 'Cell (0, 4)', 'building', {'price': 100, 'rent': 20}),
-        Cell((0, 5), 'Cell (0, 5)', 'building', {'price': 100, 'rent': 20}),
-        Cell((1, 0), 'Cell (1, 0)', 'go_to_jail', {'target_position': (5, 5)}),
-        Cell((1, 5), 'Cell (1, 5)', 'building', {'price': 100, 'rent': 20}),
-        Cell((2, 0), 'Cell (2, 0)', 'building', {'price': 100, 'rent': 20}),
-        Cell((2, 5), 'Cell (2, 5)', 'chance', None),
-        Cell((3, 0), 'Cell (3, 0)', 'building', {'price': 100, 'rent': 20}),
-        Cell((3, 5), 'Cell (3, 5)', 'building', {'price': 100, 'rent': 20}),
-        Cell((4, 0), 'Cell (4, 0)', 'community_chest', {'reward': 200}),
-        Cell((4, 5), 'Cell (4, 5)', 'building', {'price': 100, 'rent': 20}),
-        Cell((5, 0), 'Cell (5, 0)', 'building', {'price': 100, 'rent': 20}),
-        Cell((5, 1), 'Cell (5, 1)', 'building', {'price': 100, 'rent': 20}),
-        Cell((5, 2), 'Cell (5, 2)', 'building', {'price': 100, 'rent': 20}),
-        Cell((5, 3), 'Cell (5, 3)', 'building', {'price': 100, 'rent': 20}),
-        Cell((5, 4), 'Cell (5, 4)', 'building', {'price': 100, 'rent': 20}),
-        Cell((5, 5), 'Cell (5, 5)', 'jail', {'stayTerms': 2}),
+        Cell((0, 4), 'Building', 'building', {'price': 100, 'rent': 20}),
+        Cell((0, 5), 'Building', 'building', {'price': 100, 'rent': 20}),
+        Cell((1, 0), 'Go to jail', 'go_to_jail', {'target_position': (5, 5)}),
+        Cell((1, 5), 'Building', 'building', {'price': 100, 'rent': 20}),
+        Cell((2, 0), 'Building', 'building', {'price': 100, 'rent': 20}),
+        Cell((2, 5), 'Chance', 'chance', None),
+        Cell((3, 0), 'Building', 'building', {'price': 100, 'rent': 20}),
+        Cell((3, 5), 'Building', 'building', {'price': 100, 'rent': 20}),
+        Cell((4, 0), 'Reward', 'community_chest', {'reward': 200}),
+        Cell((4, 5), 'Building', 'building', {'price': 100, 'rent': 20}),
+        Cell((5, 0), 'Building', 'building', {'price': 100, 'rent': 20}),
+        Cell((5, 1), 'Building', 'building', {'price': 100, 'rent': 20}),
+        Cell((5, 2), 'Building', 'building', {'price': 100, 'rent': 20}),
+        Cell((5, 3), 'Building', 'building', {'price': 100, 'rent': 20}),
+        Cell((5, 4), 'Building', 'building', {'price': 100, 'rent': 20}),
+        Cell((5, 5), 'Jail', 'jail', {'stayTerms': 2}),
     ]
 
     connections = {
@@ -68,8 +82,5 @@ if __name__ == "__main__":
     # 初始化游戏状态
     game = Game(players, cells, connections)
 
-    app = QApplication(sys.argv)
-    main_window = UI(game)
-    main_window.show()
-    main_window.run()
-    sys.exit(app.exec_())
+    run_UI(game)
+    # run_game(game)

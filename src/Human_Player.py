@@ -10,7 +10,7 @@ class HumanPlayer(Player):
 
     def get_action(self, gameState, UI=None):
         action_list = gameState.get_action_list()
-        if UI is not None:
+        if UI:
             return UI.get_action(action_list)
         match action_list:
             case []:

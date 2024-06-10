@@ -1,12 +1,8 @@
 import sys
 import os
 from PyQt5.QtWidgets import QMessageBox, QApplication, QMainWindow, QDialog, QHBoxLayout, QVBoxLayout, QLabel, QLineEdit, QPushButton, QWidget, QGridLayout, QDialogButtonBox
-from PyQt5.QtCore import Qt, pyqtSignal
-from PyQt5.QtGui import QPixmap
+from PyQt5.QtCore import Qt
 from Action import Action
-
-
-PLAYER_ICON_PATH = os.path.join(os.path.dirname(__file__), '..\\assets\\', 'player_icon.png')
 
 
 class UI(QMainWindow):
@@ -53,9 +49,6 @@ class UI(QMainWindow):
         self.player_info = QLabel("玩家信息")
         self.game_info_layout.addWidget(self.player_info)
 
-        self.balance_info = QLabel("资金信息")
-        self.game_info_layout.addWidget(self.balance_info)
-
         self.layout.addLayout(self.game_info_layout)
 
     def create_game_board_ui(self):
@@ -88,39 +81,37 @@ class UI(QMainWindow):
         # Update the player info
         player_info_text = "玩家信息:\n"
         for player_id, player in self.game.game_state.players.items():
-            player_info_text += f"玩家{player_id}: {player.name}\n"
+            player_info_text += f"{player.get_info()}, \n"
         self.player_info.setText(player_info_text)
 
-        # Update the balance info
-        balance_info_text = "资金信息:\n"
-        for player_id, player in self.game.game_state.players.items():
-            balance_info_text += f"玩家{player_id}: {player.balance}\n"
-        self.balance_info.setText(balance_info_text)
-
     def update_game_board_ui(self):
-        print("Update game board UI")
         for position, cell in self.game.game_state.cells.items():
             cell_widget = self.cells_widgets[position]
             text = cell.name
+
+            cell_bg_color = self.type2color.get(cell.type, 'lightgrey')
+            cell_widget.setStyleSheet(f"""
+                QLabel {{
+                    background-color: {cell_bg_color};
+                    border: 1px solid black;
+                }}
+            """)
 
             # 为每个player的位置更新单元格显示
             for player_id, player in self.game.game_state.players.items():
                 if player.position == position:
                     text += f"\n👦🏻{player.name}"
 
+                if cell.type == 'building' and cell.owner == player_id:
+                    cell_bg_color = self.playerid2color.get(player_id, 'grey')
+                    cell_widget.setStyleSheet(f"""
+                        QLabel {{
+                            background-color: {cell_bg_color};
+                            border: 1px solid black;
+                        }}
+                    """)
+
             cell_widget.setText(text)
-
-        for player_id, player in self.game.game_state.players.items():
-            for cell in player.cells_owned:
-                cell_widget = self.cells_widgets[cell.position]
-                cell_bg_color = self.playerid2color.get(player_id, 'grey')
-
-                cell_widget.setStyleSheet(f"""
-                    QLabel {{
-                        background-color: {cell_bg_color};
-                        border: 1px solid black;
-                    }}
-                """)
 
     def none_operation(self):
         self.last_action = 'none'
@@ -146,12 +137,12 @@ class UI(QMainWindow):
     def get_reward(self):
         self.last_action = 'get_reward'
 
-    def show_message(self, message):
+    def show_message(self, message: str):
         msg = QMessageBox()
         msg.setText(message)
         msg.exec_()
 
-    def get_action(self, action_list):
+    def get_action(self, action_list: list[Action]):
         action_type_list = [action.action_type for action in action_list]
 
         dialog = QDialog(self)
@@ -218,7 +209,7 @@ class UI(QMainWindow):
 
         return Action("none", self.game.game_state.current_player_id)  # 如果没有选择操作，返回 "none"
 
-    def run(self):
-        winner = self.game.run()
+    def run(self, *args, **kwargs):
+        winner = self.game.run(*args, **kwargs)
         self.show_message(f"游戏结束！{winner.name}获胜！用时{self.game.game_state.round}轮")
         sys.exit()

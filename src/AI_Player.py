@@ -8,7 +8,7 @@ class RandomPlayer(Player):
         super().__init__(id, name)
         self.is_human = False
 
-    def get_action(self, gameState):
+    def get_action(self, gameState, UI=None):
         action_list = gameState.get_action_list()
         match action_list:
             case []:

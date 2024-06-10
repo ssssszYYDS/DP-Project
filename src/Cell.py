@@ -30,3 +30,6 @@ class Cell:
 
     def __repr__(self):
         return f"Cell('{self.name}', {self.position}, {self.type}, {self.details})"
+
+    def get_info(self):
+        return f"地块{self.position}: {self.name}, 类型: {self.type}, 详情: {self.details}"
