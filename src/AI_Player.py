@@ -25,7 +25,7 @@ class RandomPlayer(Player):
                 return random.choice(action_list)
 
 
-class BaseAIPlayer(Player):
+class GreedyAIPlayer(Player):
     def __init__(self, id, name):
         super().__init__(id, name)
         self.is_human = False
@@ -63,12 +63,12 @@ class BaseAIPlayer(Player):
                 other_building_rent = [cell.rent for cell in building_cell if cell.owner !=
                                        self.id and cell.owner is not None]
 
-                round = BaseAIPlayer.exp_alive_round(
+                round = GreedyAIPlayer.exp_alive_round(
                     player_num, cell_num, your_building_rent, other_building_rent, balance)
-                exp_num = BaseAIPlayer.exp_num_once(cell_num)
+                exp_num = GreedyAIPlayer.exp_num_once(cell_num)
 
                 current_cell = gameState.cells[self.position]
-                can_sell_rate = BaseAIPlayer.exp_CDF(round, exp_num)
+                can_sell_rate = GreedyAIPlayer.exp_CDF(round, exp_num)
 
                 if 'buy' in action_type_list:
                     if (1 - Config.selling_rate * can_sell_rate) * current_cell.price < round * current_cell.rent / cell_num * (player_num - 1):
@@ -356,7 +356,7 @@ class ValueIterationPlayer(Player):
     def __init__(self, id, name, train=False):
         super().__init__(id, name)
         self.is_human = False
-        if len(ValueIterationPlayer.state2value) == 0:
+        if ValueIterationPlayer.state2value == None or len(ValueIterationPlayer.state2value) == 0:
             if train:
                 ValueIterationPlayer.state2value = ValueIterationPlayer.init_values()
             else:

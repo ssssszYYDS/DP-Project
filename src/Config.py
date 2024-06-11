@@ -26,9 +26,9 @@ class Config:
 
     # players_config = [['HumanPlayer', 1, 'Alice'], ['RandomPlayer', 2, 'Bob']]
     # players_config = [['RandomPlayer', 1, 'Alice'], ['RandomPlayer', 2, 'Bob']]
-    # players_config = [['BaseAIPlayer', 1, 'Alice'], ['RandomPlayer', 2, 'Bob']]
+    # players_config = [['GreedyAIPlayer', 1, 'Alice'], ['RandomPlayer', 2, 'Bob']]
     # players_config = [['ValueIterationPlayer', 1, 'Alice', True], ['RandomPlayer', 2, 'Bob']]
-    players_config = [['ValueIterationPlayer', 1, 'Alice', True], ['BaseAIPlayer', 2, 'Bob']]
+    players_config = [['ValueIterationPlayer', 1, 'Alice', True], ['GreedyAIPlayer', 2, 'Bob']]
 
     cell_config = [[(0, 0), 'start', 'start', None],
                    [(0, 1), 'Building', 'building', {'price': 100, 'rent': 20}],
