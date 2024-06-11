@@ -14,7 +14,7 @@ class HumanPlayer(Player):
             return UI.get_action(action_list)
         match action_list:
             case []:
-                raise ("No actions available")
+                assert False, "No action available"
             case [action]:
                 return action
             case _:

@@ -3,9 +3,10 @@ from time import sleep
 from Human_Player import HumanPlayer
 from AI_Player import RandomPlayer
 
-from Cell import Cell
 from Action import Action
 from copy import deepcopy
+
+from Config import Config
 
 
 class GameState:
@@ -111,7 +112,8 @@ class Game:
             # 从当前玩家处获取动作2次(一次移动，一次其他动作)
             for _ in range(2):
                 action = current_player.get_action(self.game_state, self.UI)
-                print(f"current player: {current_player.name}, \taction: {action.action_type}")
+                if Config.DEBUG:
+                    print(f"current player: {current_player.name}, \taction: {action.action_type}")
 
                 # 更新游戏状态
                 self.update_game_state(action)
@@ -127,7 +129,7 @@ class Game:
                 for player in self.game_state.players.values():
                     player.has_moved = False
 
-                    player.balance -= 20  # 每一轮结束时扣除一定金额
+                    player.balance -= Config.round_reduce  # 每一轮结束时扣除一定金额
                     if player.balance < 0:
                         player.alive = False
 

@@ -1,5 +1,7 @@
 import random
 
+from Config import Config
+
 
 class Action:
     all_actions = ['none', 'move', 'buy', 'sell', 'pay_rent', 'in_jail', 'go_to_jail', 'get_reward']
@@ -29,13 +31,17 @@ class Action:
                 self.get_reward(gameState)
             case _:
                 raise ValueError("Invalid action type")
+        gameState.players[self.player_id].belief[self.action_type] *= Config.belief_gamma
+        gameState.players[self.player_id].belief[self.action_type] += 1.0
 
     # 更新玩家位置的逻辑
+
     def move_player(self, gameState):
         player = gameState.players[self.player_id]
         # 计算新位置
         step_number = random.randint(1, 6)
-        print(f"{player.name} moves {step_number} steps")
+        if Config.DEBUG:
+            print(f"{player.name} moves {step_number} steps")
         current_position = player.position
         for _ in range(step_number):
             current_position = gameState.cell_connections[current_position][player.direction]
@@ -63,7 +69,7 @@ class Action:
 
         assert cell in player.cells_owned, "Player does not own the property"
 
-        player.balance += int(cell.price * 0.5)
+        player.balance += int(cell.price * Config.selling_rate)
         player.cells_owned.remove(cell)
         cell.owner = None
 
@@ -77,7 +83,7 @@ class Action:
         if player.balance < 0:
             player.alive = False
 
-    # 玩家进入监狱的逻辑
+    # 玩家在监狱中的逻辑
     def in_jail(self, gameState):
         player = gameState.players[self.player_id]
         player.in_jail -= 1
@@ -88,7 +94,7 @@ class Action:
         player.position = gameState.cells[player.position].target_position
         player.in_jail = gameState.cells[player.position].stayTerms
 
-    # 玩家进入监狱的逻辑
+    # 玩家获得奖励的逻辑
     def get_reward(self, gameState):
         player = gameState.players[self.player_id]
         player.balance += gameState.cells[player.position].reward
