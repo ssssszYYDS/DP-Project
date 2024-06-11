@@ -17,7 +17,7 @@ class Config:
 
     belief_gamma = 0.9
     VI_max_iter = 1000
-    VI_gamma = 0.9
+    VI_gamma = 0.99
     VI_epislon = 1e-4
     VI_data_save_iter = 10
     VI_data_filepath = os.path.join(os.path.dirname(__file__), '../data/VI_data.json')
