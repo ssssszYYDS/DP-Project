@@ -5,7 +5,6 @@ class Cell:
         self.position = position
         self.name = name
         self.details = details
-        self.item = []
 
         if type not in Cell.type_list:
             raise ValueError(f"Invalid cell type: {type}")

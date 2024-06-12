@@ -22,7 +22,6 @@ class Player:
 
     @abstractmethod
     def get_action(self, gameState, UI=None):
-
         pass
 
     def beta(a, b):

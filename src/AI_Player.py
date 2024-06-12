@@ -1,6 +1,10 @@
+from collections import Counter
+import math
 import os
 import random
 import json
+
+import numpy as np
 from Action import Action
 from Config import Config
 from Player import Player
@@ -25,7 +29,7 @@ class RandomPlayer(Player):
                 return random.choice(action_list)
 
 
-class GreedyAIPlayer(Player):
+class BaseAIPlayer(Player):
     def __init__(self, id, name):
         super().__init__(id, name)
         self.is_human = False
@@ -63,12 +67,12 @@ class GreedyAIPlayer(Player):
                 other_building_rent = [cell.rent for cell in building_cell if cell.owner !=
                                        self.id and cell.owner is not None]
 
-                round = GreedyAIPlayer.exp_alive_round(
+                round = BaseAIPlayer.exp_alive_round(
                     player_num, cell_num, your_building_rent, other_building_rent, balance)
-                exp_num = GreedyAIPlayer.exp_num_once(cell_num)
+                exp_num = BaseAIPlayer.exp_num_once(cell_num)
 
                 current_cell = gameState.cells[self.position]
-                can_sell_rate = GreedyAIPlayer.exp_CDF(round, exp_num)
+                can_sell_rate = BaseAIPlayer.exp_CDF(round, exp_num)
 
                 if 'buy' in action_type_list:
                     if (1 - Config.selling_rate * can_sell_rate) * current_cell.price < round * current_cell.rent / cell_num * (player_num - 1):
@@ -85,11 +89,25 @@ class GreedyAIPlayer(Player):
 
 
 class SimplifiedState:
+    @staticmethod
+    def normalize(vec: dict):
+        total = sum(vec.values())
+        for k in vec.keys():
+            vec[k] /= total
+        return vec
+
     def __init__(self, player1, player2, player1_building_num, player2_building_num):
         self.players = {player1.id: deepcopy(player1), player2.id: deepcopy(player2)}
+        for player in self.players.values():
+            player.balance_float = player.balance
+            player.in_jail_float = player.in_jail
+
+        self.player1_building_float = player1_building_num
         self.player1_building_num = player1_building_num
+        self.player2_building_float = player2_building_num
         self.player2_building_num = player2_building_num
         self.empty_building_num = Config.total_buildings - player1_building_num - player2_building_num
+        self.weight = 1
 
     def to_string(self):
         p1 = self.players[1]
@@ -99,7 +117,7 @@ class SimplifiedState:
     def update_balance_state(self):
         player1, player2 = self.players.values()
         if player1.balance < Config.safe_balance or player2.balance < Config.safe_balance:
-            if abs(player1.balance - player2.balance) < Config.risky_balance_diff and player1.balance / max(player2.balance, 0.01) >= 0.75 and player1.balance / max(player2.balance, 0.01) <= 1.33:
+            if abs(player1.balance - player2.balance) < Config.risky_balance_diff and player1.balance / max(player2.balance, 0.01) >= 0.75 and player1.balance / max(player2.balance, 0.01) <= 1.33 or player1.balance == player2.balance:
                 player1.balance_state = 'risky~'
                 player2.balance_state = 'risky~'
             else:
@@ -115,7 +133,7 @@ class SimplifiedState:
         if self.players[playerid].in_jail > 0:
             available_actions['in_jail'] = 1.0
         else:
-            available_actions['none'] = self.empty_building_num + Config.total_none
+            available_actions['none'] = Config.total_none
             available_actions['go_to_jail'] = Config.total_go_to_jail
             if playerid == 1:
                 if self.player1_building_num > 0:
@@ -134,14 +152,12 @@ class SimplifiedState:
             else:
                 assert False, "Only support 2 players"
         # Normalize
-        total = sum(available_actions.values())
-        for key in available_actions:
-            available_actions[key] /= total
-        return available_actions
+        return SimplifiedState.normalize(available_actions)
 
     def get_next_state(self, action):
         next_gameState = deepcopy(self)
         player = next_gameState.players[action.player_id]
+        another_player = next_gameState.players[3 - action.player_id]
 
         if action.player_id == 1:
             match action.action_type:
@@ -157,12 +173,13 @@ class SimplifiedState:
                     next_gameState.empty_building_num += 1
                 case 'pay_rent':
                     player.balance -= Config.building_rent
+                    another_player.balance += Config.building_rent
                 case 'in_jail':
                     player.in_jail -= 1
                 case 'go_to_jail':
                     player.in_jail = Config.jail_terms
                 case 'get_reward':
-                    player.balance += Config.total_rewards / Config.total_reward_cells
+                    player.balance += Config.rewards
                 case _:
                     assert False, "Invalid action"
         elif action.player_id == 2:
@@ -179,12 +196,13 @@ class SimplifiedState:
                     next_gameState.empty_building_num += 1
                 case 'pay_rent':
                     player.balance -= Config.building_rent
+                    another_player.balance += Config.building_rent
                 case 'in_jail':
                     player.in_jail -= 1
                 case 'go_to_jail':
                     player.in_jail = Config.jail_terms
                 case 'get_reward':
-                    player.balance += Config.total_rewards / Config.total_reward_cells
+                    player.balance += Config.rewards
                 case _:
                     assert False, "Invalid action"
         else:
@@ -192,6 +210,33 @@ class SimplifiedState:
 
         next_gameState.update_balance_state()
         return next_gameState
+
+    def combine(self, other, playerid, weight=1.0):
+        for player, other_player in zip(self.players.values(), other.players.values()):
+            if player.id == playerid:
+                player.balance_float = round((player.balance_float * self.weight +
+                                             other_player.balance_float * weight)/(self.weight + weight))
+                player.balance = round(player.balance_float)
+                player.in_jail_float = round((player.in_jail_float * self.weight +
+                                             other_player.in_jail_float * weight)/(self.weight + weight))
+                player.in_jail = round(player.in_jail_float)
+                player.alive = player.alive and other_player.alive
+
+        if playerid == 1:
+            self.player1_building_float = (self.player1_building_float * self.weight +
+                                           other.player1_building_float * weight)/(self.weight + weight)
+            self.player1_building_num = round(self.player1_building_float)
+        elif playerid == 2:
+            self.player2_building_float = (self.player2_building_float * self.weight +
+                                           other.player2_building_float * weight)/(self.weight + weight)
+            self.player2_building_num = round(self.player2_building_float)
+        else:
+            assert False, "Only support 2 players"
+        self.empty_building_num = Config.total_buildings - self.player1_building_num - self.player2_building_num
+
+        self.weight += weight
+
+        return self
 
 
 class ValueIterationPlayer(Player):
@@ -206,7 +251,7 @@ class ValueIterationPlayer(Player):
                     state2value[key] = {int(k): v for k, v in value.items()}
 
     @staticmethod
-    def gamestate2state(gameState) -> SimplifiedState:
+    def gamestate2state_str(gameState) -> SimplifiedState:
         assert len(gameState.players) == 2, "Only support 2 players"
 
         players = deepcopy(list(gameState.players.values()))
@@ -216,46 +261,73 @@ class ValueIterationPlayer(Player):
         player2_building_num = len([building for building in total_buildings if building.owner == 2])
         state = SimplifiedState(*players, player1_building_num, player2_building_num)
         state.update_balance_state()
-        return state
+        return state.to_string()
 
     @staticmethod
     def get_reward(action):
+        reward = 0
         match action.action_type:
             case 'none':
-                return 0
+                reward += 0
             case 'buy':
-                return -Config.building_price
+                reward -= Config.building_price
             case 'sell':
-                return Config.building_price * Config.selling_rate
+                reward += Config.building_price * Config.selling_rate
             case 'pay_rent':
-                return -Config.building_rent
+                reward -= 2*Config.building_rent
             case 'in_jail':
-                return 0
+                reward += 0
             case 'go_to_jail':
-                return 0
+                reward += 0
             case 'get_reward':
-                return Config.rewards
+                reward += Config.rewards
             case _:
                 assert False, "Invalid action"
+        return reward
 
     @staticmethod
-    def update_value(state, player_id, state2value, gamma):
+    def update_value(state, player_id, state2value, gamma, simulate_num=100000):
+        another_player_id = 3 - player_id
+        if not state.players[player_id].alive and not state.players[another_player_id].alive:
+            return 0
         if not state.players[player_id].alive:
             return -Config.inf
-        action_type_list = state.get_action_type_dict(player_id)
-        action_list = [Action(action_type, player_id) for action_type in action_type_list.keys()]
-        prob_list = [action_prob for action_prob in action_type_list.values()]
-        match action_list:
-            case []:
-                assert False, "No action available"
-            case [action]:
-                return 0
-            case _:
-                next_states = [state.get_next_state(action) for action in action_list]
-                next_states_values = [state2value[next_state.to_string()][player_id]
-                                      for next_state in next_states]
-                return sum(prob * (ValueIterationPlayer.get_reward(action) + gamma * next_state_value)
-                           for prob, action, next_state_value in zip(prob_list, action_list, next_states_values))
+        if not state.players[another_player_id].alive:
+            return Config.inf
+        action_type_dict = state.get_action_type_dict(player_id)
+        # 根据action_type_dict.values()为概率随机抽取对应的key
+        can_buy = state.empty_building_num > 0
+        can_sell = state.player1_building_num > 0 if player_id == 1 else state.player2_building_num > 0
+
+        new_value = 0.0
+        action_none = Action('none', player_id)
+        for selected_action, prob in action_type_dict.items():
+            action_list = []
+
+            if selected_action == 'buy' and can_buy:
+                action_list = [action_none, Action(selected_action, player_id)]
+            elif selected_action == 'sell' and can_sell:
+                action_list = [action_none, Action(selected_action, player_id)]
+            elif selected_action not in ['buy', 'sell']:
+                action_list = [Action(selected_action, player_id)]
+            else:
+                action_list = [action_none]
+
+            next_states = [state.get_next_state(action) for action in action_list]
+            next_state_strs = [next_state.to_string() for next_state in next_states]
+            new_values = [ValueIterationPlayer.get_reward(
+                a) + gamma * state2value[next_state_str][player_id] for a, next_state_str in zip(action_list, next_state_strs)]
+            max_index = np.argmax(new_values)
+
+            next_state = next_states[max_index]
+            next_state_str = next_state_strs[max_index]
+            next_state_value = new_values[max_index]
+
+            state2value[next_state_str][-1] = state2value[next_state_str][-1] \
+                .combine(next_state, player_id, prob*simulate_num)
+
+            new_value += next_state_value * prob
+        return new_value
 
     @staticmethod
     def update_values(state2value, max_iter=Config.VI_max_iter, gamma=Config.VI_gamma, epislon=Config.VI_epislon):
@@ -296,6 +368,8 @@ class ValueIterationPlayer(Player):
                     value = state2value[state_str][player_id]
                     state2value[state_str][player_id] = ValueIterationPlayer.update_value(
                         state, player_id, state2value, gamma)
+                    if delta < abs(value - state2value[state_str][player_id]):
+                        max_delta_state_str = state_str
                     delta = max(delta, abs(value - state2value[state_str][player_id]))
             state2value['iter'] += 1
             if delta < epislon:
@@ -303,8 +377,8 @@ class ValueIterationPlayer(Player):
                 break
             print(f"iter {state2value['iter']} finished")
             print(f"delta: {delta}")
-            dic = {k: v for k, v in state2value['safe|0|True|safe|0|True|0|0|14'].items() if k != -1}
-            print(f"safe|0|True|safe|0|True|0|0|14: {dic}")
+            dic = {k: v for k, v in state2value[max_delta_state_str].items() if k != -1}
+            print(f"{max_delta_state_str}: {dic}")
 
             if state2value['iter'] % Config.VI_data_save_iter == 0:
                 ValueIterationPlayer.save_data(state2value)
@@ -350,11 +424,17 @@ class ValueIterationPlayer(Player):
                                         state = SimplifiedState(players[1], players[2],
                                                                 player1_building_num, player2_building_num)
                                         state2value['iter'] = 0
-                                        state2value[state.to_string()] = {1: 0, 2: 0}
+                                        potential_value1 = Config.balance_states_potential[Config.all_balance_states.index(
+                                            player1_balance_state)]
+                                        potential_value2 = Config.balance_states_potential[Config.all_balance_states.index(
+                                            player2_balance_state)]
+                                        state2value[state.to_string()] = {
+                                            1: potential_value1 + player1_building_num * Config.building_price + Config.start_balance, 2: potential_value2 + player2_building_num * Config.building_price + Config.start_balance}
         ValueIterationPlayer.update_values(state2value)
 
     def __init__(self, id, name, train=False):
         super().__init__(id, name)
+        # self.balance -= 500
         self.is_human = False
         if ValueIterationPlayer.state2value == None or len(ValueIterationPlayer.state2value) == 0:
             if train:
@@ -363,7 +443,6 @@ class ValueIterationPlayer(Player):
                 raise Exception("Please Iterate the Value first")
         elif train:
             ValueIterationPlayer.state2value = ValueIterationPlayer.update_values(ValueIterationPlayer.state2value)
-
         if Config.DEBUG:
             for state_str, dictionary in self.state2value.items():
                 # 排除键为-1的项
@@ -379,10 +458,15 @@ class ValueIterationPlayer(Player):
                 return action
             case _:
                 next_gamestates = [gameState.get_next_state(action) for action in action_list]
-                next_states = [ValueIterationPlayer.gamestate2state(
+                next_states_str = [ValueIterationPlayer.gamestate2state_str(
                     next_gamestate) for next_gamestate in next_gamestates]
-                next_states_values = [self.state2value[next_state.to_string()][self.id]
-                                      for next_state in next_states]
+                try:
+                    another_id = 3 - self.id
+                    next_states_values = [ValueIterationPlayer.state2value[next_state_str][self.id] - ValueIterationPlayer.state2value[next_state_str][another_id] + ValueIterationPlayer.get_reward(action)
+                                          for next_state_str, action in zip(next_states_str, action_list)]
+                except:
+                    print(f"non-exist state_str: {next_states_str}")
+                # 返回next_states_values + get_reward(action)中最大的那个
                 return action_list[next_states_values.index(max(next_states_values))]
 
 
@@ -393,6 +477,7 @@ class ExpMaxPlayer(Player):
 
     @staticmethod
     def v1(gameState):
+        # TODO
         pass
 
     def get_action(self, gameState, UI=None):

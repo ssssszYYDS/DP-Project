@@ -1,7 +1,7 @@
 import random
 from time import sleep
 from Human_Player import HumanPlayer
-from AI_Player import RandomPlayer
+from AI_Player import *
 
 from Action import Action
 from copy import deepcopy
@@ -139,7 +139,7 @@ class Game:
                 break
 
             if step_time > 0:
-                sleep(step_time)
+                self.UI.show_blocking_window(step_time)
 
         return self.get_winner()
 

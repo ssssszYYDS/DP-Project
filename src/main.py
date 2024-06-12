@@ -1,18 +1,20 @@
 import random
+from Human_Player import HumanPlayer
 from AI_Player import *
 
 from Cell import Cell
 from Game import Game
 from UI import *
 
+
 from Config import Config
 
 
-def run_UI(game: Game):
+def run_UI(game: Game, *args, **kwargs):
     app = QApplication(sys.argv)
     main_window = UI(game)
     main_window.show()
-    main_window.run(max_rounds=10000)
+    main_window.run(max_rounds=10000, *args, **kwargs)
     app.exec_()
 
 
@@ -33,7 +35,7 @@ def get_win_rate(game_times: int = 100):
         winner_name, round = run_game(game)
         win_count[winner_name] += 1
         total_round[winner_name] += round
-    return {name: {'win_rate': win_count[name] / game_times, 'avg_round': total_round[name] / game_times} for name in win_count}
+    return {name: {'win_rate': win_count[name] / game_times, 'avg_round': total_round[name] / win_count[name] if win_count[name] > 0 else 0.0} for name in win_count}
 
 
 if __name__ == "__main__":
@@ -46,6 +48,6 @@ if __name__ == "__main__":
     # 初始化游戏状态
     game = Game(players, cells, connections)
 
-    # run_UI(game)
+    run_UI(game, step_time=0.05)
     # run_game(game)
-    print(get_win_rate(100))
+    # print(get_win_rate(1))

@@ -3,6 +3,8 @@ import os
 from PyQt5.QtWidgets import QMessageBox, QApplication, QMainWindow, QDialog, QHBoxLayout, QVBoxLayout, QLabel, QLineEdit, QPushButton, QWidget, QGridLayout, QDialogButtonBox
 from PyQt5.QtCore import Qt
 from Action import Action
+import time
+from PyQt5.QtCore import QTimer
 
 
 class UI(QMainWindow):
@@ -213,3 +215,26 @@ class UI(QMainWindow):
         winner = self.game.run(*args, **kwargs)
         self.show_message(f"游戏结束！{winner.name}获胜！用时{self.game.game_state.round}轮")
         sys.exit()
+
+    def show_blocking_window(self, step_time):
+        blocking_window = BlockingWindow(step_time, self)
+        blocking_window.exec_()
+
+
+class BlockingWindow(QDialog):
+    def __init__(self, step_time, parent=None):
+        super().__init__(parent)
+        self.setWindowTitle("请等待")
+        self.setGeometry(1500, 1000, 200, 100)
+        self.setModal(True)  # 设置为模态窗口，阻塞其他窗口操作
+
+        # 设置一个居中的提示标签
+        label = QLabel("正在处理，请稍候 ...", self)
+        label.setAlignment(Qt.AlignCenter)
+
+        layout = QVBoxLayout()
+        layout.addWidget(label)
+        self.setLayout(layout)
+
+        # 设置定时器
+        QTimer.singleShot(int(step_time * 1000), self.close)
