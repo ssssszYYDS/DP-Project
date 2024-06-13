@@ -52,4 +52,4 @@ if __name__ == "__main__":
     # run_game(game)
     # print(get_win_rate(100))
     run_UI(game, step_time=0.05)
-    # time.sleep(10)
+    time.sleep(10)
