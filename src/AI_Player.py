@@ -321,12 +321,11 @@ class ValueIterationPlayer(Player):
 
             next_state = next_states[max_index]
             next_state_str = next_state_strs[max_index]
-            next_state_value = new_values[max_index]
 
             state2value[next_state_str][-1] = state2value[next_state_str][-1] \
                 .combine(next_state, player_id, prob*simulate_num)
 
-            new_value += next_state_value * prob
+            new_value += new_values[max_index] * prob
         return new_value
 
     @staticmethod
