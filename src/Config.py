@@ -5,11 +5,12 @@ class Config:
     DEBUG = False
 
     seed = "MGMT1317"
-    start_balance = 2000
+    start_balance = 5000
     round_reduce = 20
     selling_rate = 0.5
 
     # players_config = [['HumanPlayer', 1, 'Alice'], ['RandomPlayer', 2, 'Bob']]
+    # players_config = [['HumanPlayer', 1, 'Alice'], ['BaseAIPlayer', 2, 'Bob']]
     # players_config = [['HumanPlayer', 1, 'Alice'], ['ValueIterationPlayer', 2, 'Bob']]
     # players_config = [['RandomPlayer', 1, 'Alice'], ['RandomPlayer', 2, 'Bob']]
     # players_config = [['BaseAIPlayer', 1, 'Alice'], ['RandomPlayer', 2, 'Bob']]

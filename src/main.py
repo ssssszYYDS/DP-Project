@@ -48,6 +48,8 @@ if __name__ == "__main__":
     # 初始化游戏状态
     game = Game(players, cells, connections)
 
-    run_UI(game, step_time=0.05)
+    # run_UI(game)
     # run_game(game)
-    # print(get_win_rate(1))
+    # print(get_win_rate(100))
+    run_UI(game, step_time=0.05)
+    # time.sleep(10)
