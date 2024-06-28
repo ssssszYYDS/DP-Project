@@ -59,6 +59,7 @@ if __name__ == "__main__":
     # # 初始化游戏状态
     # game = Game(players, cells, connections)
 
+<<<<<<< HEAD
     # # run_game(game)
     # run_UI(game, step_time=0.05)
     # # run_UI(game, step_time=999)
@@ -71,3 +72,10 @@ if __name__ == "__main__":
         [['BaseAIPlayer', 1, 'Alice'], ['GreedyAIPlayer', 2, 'Bob']],
         [['GreedyAIPlayer', 1, 'Alice'], ['RandomPlayer', 2, 'Bob']],
     ])
+=======
+    # run_UI(game)
+    # run_game(game)
+    # print(get_win_rate(100))
+    run_UI(game, step_time=0.05)
+    time.sleep(10)
+>>>>>>> 6d64c01def627076f35eaaac20810838794659dd

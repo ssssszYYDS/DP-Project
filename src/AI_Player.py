@@ -29,6 +29,28 @@ class RandomPlayer(Player):
                 return random.choice(action_list)
 
 
+class GreedyPlayer(Player):
+    def __init__(self, id, name):
+        super().__init__(id, name)
+        self.is_human = False
+
+    def get_action(self, gameState, UI=None):
+        action_list = gameState.get_action_list()
+        match action_list:
+            case []:
+                assert False, "No action available"
+            case [action]:
+                return action
+            case _:
+                action_type_list = [action.action_type for action in action_list]
+                if 'buy' in action_type_list:
+                    return action_list[action_type_list.index('buy')]
+                elif 'sell' in action_type_list:
+                    return action_list[action_type_list.index('none')]
+                else:
+                    assert False, "Only buy and sell can choose."
+
+
 class BaseAIPlayer(Player):
     def __init__(self, id, name):
         super().__init__(id, name)
