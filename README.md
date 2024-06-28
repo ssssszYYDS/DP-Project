@@ -1,5 +1,3 @@
-[TOC]
-
 # How to run the code
 To run this project, you just need to run the src/main.py script.
 
