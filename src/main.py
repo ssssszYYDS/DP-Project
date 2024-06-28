@@ -50,32 +50,23 @@ def evaluate(players_configs: list[list[list]]):
 
 
 if __name__ == "__main__":
-    # random.seed(Config.seed)
+    random.seed(Config.seed)
 
-    # players = [eval(player[0])(*player[1:]) for player in Config.players_config]
-    # cells = [Cell(*args) for args in Config.cell_config]
-    # connections = Config.cell_connections
+    players = [eval(player[0])(*player[1:]) for player in Config.players_config]
+    cells = [Cell(*args) for args in Config.cell_config]
+    connections = Config.cell_connections
 
-    # # 初始化游戏状态
-    # game = Game(players, cells, connections)
+    # 初始化游戏状态
+    game = Game(players, cells, connections)
 
-<<<<<<< HEAD
-    # # run_game(game)
-    # run_UI(game, step_time=0.05)
-    # # run_UI(game, step_time=999)
-
-    evaluate([
-        [['ValueIterationPlayer', 1, 'Alice', False], ['RandomPlayer', 2, 'Bob']],
-        [['ValueIterationPlayer', 1, 'Alice', False], ['BaseAIPlayer', 2, 'Bob']],
-        [['ValueIterationPlayer', 1, 'Alice', False], ['GreedyAIPlayer', 2, 'Bob']],
-        [['BaseAIPlayer', 1, 'Alice'], ['RandomPlayer', 2, 'Bob']],
-        [['BaseAIPlayer', 1, 'Alice'], ['GreedyAIPlayer', 2, 'Bob']],
-        [['GreedyAIPlayer', 1, 'Alice'], ['RandomPlayer', 2, 'Bob']],
-    ])
-=======
-    # run_UI(game)
     # run_game(game)
-    # print(get_win_rate(100))
     run_UI(game, step_time=0.05)
-    time.sleep(10)
->>>>>>> 6d64c01def627076f35eaaac20810838794659dd
+
+    # evaluate([
+    #     [['ValueIterationPlayer', 1, 'Alice', False], ['RandomPlayer', 2, 'Bob']],
+    #     [['ValueIterationPlayer', 1, 'Alice', False], ['BaseAIPlayer', 2, 'Bob']],
+    #     [['ValueIterationPlayer', 1, 'Alice', False], ['GreedyAIPlayer', 2, 'Bob']],
+    #     [['BaseAIPlayer', 1, 'Alice'], ['RandomPlayer', 2, 'Bob']],
+    #     [['BaseAIPlayer', 1, 'Alice'], ['GreedyAIPlayer', 2, 'Bob']],
+    #     [['GreedyAIPlayer', 1, 'Alice'], ['RandomPlayer', 2, 'Bob']],
+    # ])
