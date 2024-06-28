@@ -33,7 +33,7 @@ class UI(QMainWindow):
 
     def initUI(self):
         self.setWindowTitle("大富翁游戏")
-        self.setGeometry(100, 100, 1200, 1200)
+        self.setGeometry(100, 100, 1200, 711)
 
         self.central_widget = QWidget()
         self.setCentralWidget(self.central_widget)
@@ -43,6 +43,9 @@ class UI(QMainWindow):
         self.create_game_board_ui()
         self.update_game_info_ui()
         self.update_game_board_ui()
+
+        self.layout.setStretch(0, 1)  # create_game_info_ui的部分占比1
+        self.layout.setStretch(1, 3)  # create_game_board_ui的部分占比3
 
     def create_game_info_ui(self):
         # Create a layout for game info

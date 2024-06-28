@@ -17,6 +17,8 @@ class Config:
     # players_config = [['ValueIterationPlayer', 1, 'Alice', True], ['RandomPlayer', 2, 'Bob']]
     # players_config = [['ValueIterationPlayer', 1, 'Alice', True], ['BaseAIPlayer', 2, 'Bob']]
     players_config = [['ValueIterationPlayer', 1, 'Alice', False], ['BaseAIPlayer', 2, 'Bob']]
+    # players_config = [['BaseAIPlayer', 1, 'Alice'], ['GreedyAIPlayer', 2, 'Bob']]
+    # players_config = [['ValueIterationPlayer', 1, 'Alice', False], ['RandomPlayer', 2, 'Bob']]
 
     inf = 9999
     rewards = 100

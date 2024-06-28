@@ -469,15 +469,10 @@ class ValueIterationPlayer(Player):
                 return action_list[next_states_values.index(max(next_states_values))]
 
 
-class ExpMaxPlayer(Player):
+class GreedyAIPlayer(Player):
     def __init__(self, id, name):
         super().__init__(id, name)
         self.is_human = False
-
-    @staticmethod
-    def v1(gameState):
-        # TODO
-        pass
 
     def get_action(self, gameState, UI=None):
         action_list = gameState.get_action_list()
@@ -487,4 +482,7 @@ class ExpMaxPlayer(Player):
             case [action]:
                 return action
             case _:
-                pass
+                action_type_list = [action.action_type for action in action_list]
+                if 'buy' in action_type_list:
+                    return action_list[action_type_list.index('buy')]
+                return action_list[action_type_list.index('none')]

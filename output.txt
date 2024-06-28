@@ -1,0 +1,48 @@
+[['ValueIterationPlayer', 1, 'Alice', False], ['RandomPlayer', 2, 'Bob']]
+Config.start_balance = 5000
+{'Alice': {'win_rate': '100.0%', 'avg_round': 233.346}, 'Bob': {'win_rate': '0.0%', 'avg_round': 'NA'}}
+Config.start_balance = 2000
+{'Alice': {'win_rate': '89.1%', 'avg_round': 96.89674523007857}, 'Bob': {'win_rate': '10.9%', 'avg_round': 91.1743119266055}}
+Config.start_balance = 1000
+{'Alice': {'win_rate': '18.0%', 'avg_round': 35.33888888888889}, 'Bob': {'win_rate': '82.0%', 'avg_round': 25.365853658536587}}
+-----------------------------------------
+[['ValueIterationPlayer', 1, 'Alice', False], ['BaseAIPlayer', 2, 'Bob']]
+Config.start_balance = 5000
+{'Alice': {'win_rate': '56.6%', 'avg_round': 349.47173144876325}, 'Bob': {'win_rate': '43.4%', 'avg_round': 357.0230414746544}}
+Config.start_balance = 2000
+{'Alice': {'win_rate': '62.4%', 'avg_round': 100.95833333333333}, 'Bob': {'win_rate': '37.6%', 'avg_round': 92.29255319148936}}
+Config.start_balance = 1000
+{'Alice': {'win_rate': '4.9%', 'avg_round': 49.61224489795919}, 'Bob': {'win_rate': '95.1%', 'avg_round': 26.186119873817034}}
+-----------------------------------------
+[['ValueIterationPlayer', 1, 'Alice', False], ['GreedyAIPlayer', 2, 'Bob']]
+Config.start_balance = 5000
+{'Alice': {'win_rate': '52.6%', 'avg_round': 354.9486692015209}, 'Bob': {'win_rate': '47.4%', 'avg_round': 362.6603375527426}}
+Config.start_balance = 2000
+{'Alice': {'win_rate': '46.0%', 'avg_round': 105.51304347826087}, 'Bob': {'win_rate': '54.0%', 'avg_round': 108.08333333333333}}
+Config.start_balance = 1000
+{'Alice': {'win_rate': '50.2%', 'avg_round': 26.02589641434263}, 'Bob': {'win_rate': '49.8%', 'avg_round': 26.40562248995984}}
+-----------------------------------------
+[['BaseAIPlayer', 1, 'Alice'], ['RandomPlayer', 2, 'Bob']]
+Config.start_balance = 5000
+{'Alice': {'win_rate': '100.0%', 'avg_round': 234.072}, 'Bob': {'win_rate': '0.0%', 'avg_round': 'NA'}}
+Config.start_balance = 2000
+{'Alice': {'win_rate': '92.6%', 'avg_round': 95.06911447084234}, 'Bob': {'win_rate': '7.4%', 'avg_round': 105.70270270270271}}
+Config.start_balance = 1000
+{'Alice': {'win_rate': '90.3%', 'avg_round': 40.625692137320044}, 'Bob': {'win_rate': '9.7%', 'avg_round': 57.03092783505155}}
+-----------------------------------------
+[['BaseAIPlayer', 1, 'Alice'], ['GreedyAIPlayer', 2, 'Bob']]
+Config.start_balance = 5000
+{'Alice': {'win_rate': '49.3%', 'avg_round': 349.4584178498986}, 'Bob': {'win_rate': '50.7%', 'avg_round': 353.4575936883629}}
+Config.start_balance = 2000
+{'Alice': {'win_rate': '38.8%', 'avg_round': 90.58762886597938}, 'Bob': {'win_rate': '61.2%', 'avg_round': 99.5375816993464}}
+Config.start_balance = 1000
+{'Alice': {'win_rate': '96.4%', 'avg_round': 24.185684647302903}, 'Bob': {'win_rate': '3.6%', 'avg_round': 49.0}}
+-----------------------------------------
+[['GreedyAIPlayer', 1, 'Alice'], ['RandomPlayer', 2, 'Bob']]
+Config.start_balance = 5000
+{'Alice': {'win_rate': '100.0%', 'avg_round': 234.072}, 'Bob': {'win_rate': '0.0%', 'avg_round': 'NA'}}
+Config.start_balance = 2000
+{'Alice': {'win_rate': '94.1%', 'avg_round': 96.56641870350691}, 'Bob': {'win_rate': '5.9%', 'avg_round': 88.86440677966101}}
+Config.start_balance = 1000
+{'Alice': {'win_rate': '18.1%', 'avg_round': 33.530386740331494}, 'Bob': {'win_rate': '81.9%', 'avg_round': 24.942612942612943}}
+-----------------------------------------
